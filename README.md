@@ -1,1 +1,1 @@
-## Setup prometheus, loki and grafana 
+## Setup prometheus, loki and grafana on EKS
