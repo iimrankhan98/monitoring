@@ -1,0 +1,37 @@
+1. Add Helm Repositories
+
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+2. Create a Namespace for Monitoring
+kubectl create namespace monitoring
+
+3. Install Prometheus
+
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set grafana.enabled=false
+
+4. Install Loki
+helm install loki grafana/loki-stack \
+  --namespace monitoring \
+  --set grafana.enabled=false \
+  --set promtail.enabled=true
+
+helm upgrade loki grafana/loki-stack \
+  --namespace monitoring \
+  --set loki.image.tag=2.9.4
+
+
+5. Install Grafana
+helm install grafana grafana/grafana \
+  --namespace monitoring \
+  --set adminPassword='prospera@2025' \
+  --set service.type=LoadBalancer
+  --set service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-internal"="false"
+
+or
+
+kubectl patch svc grafana -n monitoring \
+  -p '{"metadata":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-internal":"false"}}}'
